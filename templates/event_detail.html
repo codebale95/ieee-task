@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ event.title }}</h1>
+    <p>{{ event.description }}</p>
+    <p><strong>Date:</strong> {{ event.date }}</p>
+    <p><strong>Location:</strong> {{ event.location }}</p>
+    <p><strong>Capacity:</strong> {{ event.capacity }}</p>
+
+    {% if user.is_authenticated %}
+        <form method="post" action="{% url 'purchase_ticket' event.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success">Purchase Ticket</button>
+        </form>
+    {% endif %}
+
+    <h2>Sub Events</h2>
+    <ul>
+        {% for sub_event in event.sub_events.all %}
+        <li>{{ sub_event.title }} - {{ sub_event.start_time }} to {{ sub_event.end_time }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Teams</h2>
+    <ul>
+        {% for team in event.teams.all %}
+        <li>{{ team.name }} ({{ team.members.count }}/{{ team.max_size }} members)</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Announcements</h2>
+    <ul>
+        {% for announcement in event.announcements.all %}
+        <li>{{ announcement.title }} - {{ announcement.content }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
