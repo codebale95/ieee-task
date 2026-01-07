@@ -5,7 +5,33 @@
     <h1>Welcome to Event Platform</h1>
     {% if user.is_authenticated %}
         <p>Hello, {{ user.username }}!</p>
-        <a href="{% url 'events' %}" class="btn btn-primary">View Events</a>
+        <a href="{% url 'create_event' %}" class="btn btn-success mb-3">Create Event</a>
+        <div class="row">
+            {% for event in events %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ event.title }}</h5>
+                            <p class="card-text">{{ event.description }}</p>
+                            <p class="card-text"><small class="text-muted">Date: {{ event.date|date:"M d, Y H:i" }}</small></p>
+                            <p class="card-text"><small class="text-muted">Location: {{ event.location }}</small></p>
+                            <p class="card-text"><small class="text-muted">Capacity: {{ event.capacity }}</small></p>
+                            <p class="card-text"><small class="text-muted">Created by: {{ event.created_by.username }}</small></p>
+                            {% if event.created_by == user %}
+                                <a href="{% url 'edit_event' event.id %}" class="btn btn-warning">Edit</a>
+                            {% else %}
+                                <form method="post" action="{% url 'purchase_ticket' event.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary">Enroll</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p>No events available.</p>
+            {% endfor %}
+        </div>
         <a href="{% url 'logout' %}" class="btn btn-secondary">Logout</a>
     {% else %}
         <a href="{% url 'login' %}" class="btn btn-primary">Login</a>

@@ -6,33 +6,33 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h2 class="mb-0">Create New Event</h2>
+                    <h2 class="mb-0">Edit Event</h2>
                 </div>
                 <div class="card-body">
                     <form method="post">
                         {% csrf_token %}
                         <div class="mb-3">
                             <label for="id_title" class="form-label">Event Title</label>
-                            <input type="text" class="form-control" id="id_title" name="title" required>
+                            <input type="text" class="form-control" id="id_title" name="title" value="{{ event.title }}" required>
                         </div>
                         <div class="mb-3">
                             <label for="id_description" class="form-label">Description</label>
-                            <textarea class="form-control" id="id_description" name="description" rows="4" required></textarea>
+                            <textarea class="form-control" id="id_description" name="description" rows="4" required>{{ event.description }}</textarea>
                         </div>
                         <div class="mb-3">
                             <label for="id_date" class="form-label">Event Date & Time</label>
-                            <input type="datetime-local" class="form-control" id="id_date" name="date" required>
+                            <input type="datetime-local" class="form-control" id="id_date" name="date" value="{{ event.date|date:'Y-m-d\TH:i' }}" required>
                         </div>
                         <div class="mb-3">
                             <label for="id_location" class="form-label">Location</label>
-                            <input type="text" class="form-control" id="id_location" name="location" required>
+                            <input type="text" class="form-control" id="id_location" name="location" value="{{ event.location }}" required>
                         </div>
                         <div class="mb-3">
                             <label for="id_capacity" class="form-label">Capacity</label>
-                            <input type="number" class="form-control" id="id_capacity" name="capacity" min="1" required>
+                            <input type="number" class="form-control" id="id_capacity" name="capacity" value="{{ event.capacity }}" min="1" required>
                         </div>
-                        <button type="submit" class="btn btn-primary">Create Event</button>
-                        <a href="{% url 'events' %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Update Event</button>
+                        <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
                     </form>
                 </div>
             </div>

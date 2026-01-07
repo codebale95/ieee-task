@@ -5,8 +5,9 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.db import transaction
 from django.core.exceptions import ValidationError
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
 from django import forms
@@ -155,7 +156,8 @@ class AnnouncementViewSet(viewsets.ModelViewSet):
 # Frontend Views
 
 def home(request):
-    return render(request, 'home.html')
+    events = Event.objects.all().order_by('date')
+    return render(request, 'home.html', {'events': events})
 
 def events_list(request):
     events = Event.objects.all()
@@ -191,36 +193,59 @@ def logout_view(request):
     logout(request)
     return redirect('home')
 
+@login_required
 def create_event(request):
     if request.method == 'POST':
         title = request.POST.get('title')
         description = request.POST.get('description')
-        date = request.POST.get('date')
-        time = request.POST.get('time')
+        date_str = request.POST.get('date')
         location = request.POST.get('location')
         capacity = request.POST.get('capacity')
+        from datetime import datetime
+        date = datetime.fromisoformat(date_str)
         event = Event.objects.create(
             title=title,
             description=description,
             date=date,
-            time=time,
             location=location,
             capacity=capacity,
             created_by=request.user,
             tenant=request.user.tenant
         )
         messages.success(request, 'Event created successfully!')
-        return redirect('events')
+        return redirect('home')
     return render(request, 'create_event.html')
 
 def my_tickets(request):
     tickets = Ticket.objects.filter(user=request.user)
     return render(request, 'my_tickets.html', {'tickets': tickets})
 
+@login_required
+def edit_event(request, event_id):
+    event = get_object_or_404(Event, id=event_id, created_by=request.user)
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        date_str = request.POST.get('date')
+        location = request.POST.get('location')
+        capacity = request.POST.get('capacity')
+        from datetime import datetime
+        date = datetime.fromisoformat(date_str)
+        event.title = title
+        event.description = description
+        event.date = date
+        event.location = location
+        event.capacity = capacity
+        event.save()
+        messages.success(request, 'Event updated successfully!')
+        return redirect('home')
+    return render(request, 'edit_event.html', {'event': event})
+
+@login_required
 def purchase_ticket(request, event_id):
     if request.method == 'POST':
         event = Event.objects.get(id=event_id)
         ticket = Ticket.objects.create(user=request.user, event=event)
         messages.success(request, 'Ticket purchased successfully!')
-        return redirect('my_tickets')
-    return redirect('event_detail', event_id=event_id)
+        return redirect('home')
+    return redirect('home')
